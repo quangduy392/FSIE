@@ -27,6 +27,35 @@ def init_args():
     parser.add_argument("--use_pdserving", type=str2bool, default=False)
     parser.add_argument("--warmup", type=str2bool, default=False)
 
+    # params for text detector
+    parser.add_argument("--image_dir", type=str)
+    parser.add_argument("--page_num", type=int, default=0)
+    parser.add_argument("--det_algorithm", type=str, default='DB')
+    parser.add_argument("--det_model_dir", type=str)
+    parser.add_argument("--det_limit_side_len", type=float, default=960)
+    parser.add_argument("--det_limit_type", type=str, default='max')
+    parser.add_argument("--det_box_type", type=str, default='quad')
+
+    # DB parmas
+    parser.add_argument("--det_db_thresh", type=float, default=0.3)
+    parser.add_argument("--det_db_box_thresh", type=float, default=0.6)
+    parser.add_argument("--det_db_unclip_ratio", type=float, default=1.5)
+    parser.add_argument("--max_batch_size", type=int, default=10)
+    parser.add_argument("--use_dilation", type=str2bool, default=False)
+    parser.add_argument("--det_db_score_mode", type=str, default="fast")
+
+    # params for text recognizer
+    parser.add_argument("--rec_algorithm", type=str, default='SVTR_LCNet')
+    parser.add_argument("--rec_model_dir", type=str)
+    parser.add_argument("--rec_image_inverse", type=str2bool, default=True)
+    parser.add_argument("--rec_image_shape", type=str, default="3, 48, 320")
+    parser.add_argument("--rec_batch_num", type=int, default=6)
+    parser.add_argument("--max_text_length", type=int, default=25)
+    parser.add_argument("--rec_char_dict_path",type=str, default="dict/VN_dict.txt")
+    parser.add_argument("--use_space_char", type=str2bool, default=True)
+    parser.add_argument("--vis_font_path", type=str, default="dict/simfang.ttf")
+    parser.add_argument("--drop_score", type=float, default=0.5)
+
     # params for output
     parser.add_argument("--output", type=str, default='./output/')
     return parser
@@ -90,3 +119,29 @@ def check_and_read(img_path):
                 imgs.append(img)
             return imgs, False, True
     return None, False, False
+
+def create_font(txt, sz, font_path="./doc/fonts/simfang.ttf"):
+    font_size = int(sz[1] * 0.99)
+    font = ImageFont.truetype(font_path, font_size, encoding="utf-8")
+    length = font.getsize(txt)[0]
+    if length > sz[0]:
+        font_size = int(font_size * sz[0] / length)
+        font = ImageFont.truetype(font_path, font_size, encoding="utf-8")
+    return font
+
+def get_output_tensors(args, mode, predictor):
+    output_names = predictor.get_output_names()
+    output_tensors = []
+    if mode == "rec" and args.rec_algorithm in ["CRNN", "SVTR_LCNet"]:
+        output_name = 'softmax_0.tmp_0'
+        if output_name in output_names:
+            return [predictor.get_output_handle(output_name)]
+        else:
+            for output_name in output_names:
+                output_tensor = predictor.get_output_handle(output_name)
+                output_tensors.append(output_tensor)
+    else:
+        for output_name in output_names:
+            output_tensor = predictor.get_output_handle(output_name)
+            output_tensors.append(output_tensor)
+    return output_tensors
