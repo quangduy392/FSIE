@@ -1,0 +1,18 @@
+paddlepaddle         #if use CPU
+#paddlepaddle-gpu     #if use GPU
+pillow
+opencv-python
+pandas
+numpy
+shapely
+pyclipper
+pyyaml
+flask
+fitz
+frontend
+PyMuPDF==1.19
+openpyxl
+premailer
+scikit-image
+python-docx 
+BeautifulSoup4
