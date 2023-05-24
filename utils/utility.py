@@ -33,7 +33,7 @@ def init_args():
     parser.add_argument("--gpu_id", type=int, default=0)
 
     # params for text detector
-    parser.add_argument("--image_dir", type=str, default="/home/cuongtm/Pictures/testbctc/layout/BCTC_5/BCTC_HN_Q.IV_nam_2022_page_6.jpg")
+    parser.add_argument("--image_dir", type=str, default="test/2_kts_2022_9_20_7c30852_kts_bctc_kiem_toan_nam_nien_do_20212022.pdf")
     parser.add_argument("--page_num", type=int, default=0)
     parser.add_argument("--det_algorithm", type=str, default='DB')
     parser.add_argument("--det_model_dir", type=str, default="model/det")
@@ -87,7 +87,7 @@ def init_args():
     parser.add_argument("--merge_no_span_structure", type=str2bool, default=True)
     parser.add_argument("--table_char_dict_path", type=str,default="utils/dict/table_dict.txt")
     # params for layout
-    parser.add_argument("--arch", type=str, default="PPYOLO", help="Choose the arch you want to run, it can be: PPYOLO/PicoDet, PicoDet if you want use PicoDet model (small model)/PPYOLO if you want use PPYOLO model (large model).")
+    parser.add_argument("--arch", type=str, default="PicoDet", help="Choose the arch you want to run, it can be: PPYOLO/PicoDet, PicoDet if you want use PicoDet model (small model)/PPYOLO if you want use PPYOLO model (large model).")
     parser.add_argument("--layout_picodet_model_dir", type=str, default="model/layout_picodet")
     parser.add_argument("--layout_ppyolo_model_dir", type=str, default="model/layout_ppyolo")
     parser.add_argument("--layout_dict_path",type=str, default="utils/dict/layout_dict/layout_publaynet_dict.txt")
