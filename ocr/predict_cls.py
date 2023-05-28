@@ -47,7 +47,8 @@ class TextClassifier(object):
                     '180': cv2.ROTATE_180,
                     '270': cv2.ROTATE_90_CLOCKWISE
                 }
-
+        print('\n===========================')
+        print(batch_output[0]['label_names'][0])
         if batch_output[0]['label_names'][0] in cv_rotate_code:
             img_ori = cv2.rotate(img_ori, cv_rotate_code[batch_output[0]['label_names'][0]])
         return img_ori, batch_output, elapse
