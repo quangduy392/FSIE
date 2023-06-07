@@ -127,7 +127,7 @@ if __name__ == "__main__":
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
     img_num = len(image_file_list)
-    app.run(host = '127.0.0.1', port = '8686', debug = True)
+    app.run(host = '127.0.0.1', port = '8686', debug = False)
 
 
     run(args)

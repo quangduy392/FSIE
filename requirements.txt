@@ -16,3 +16,4 @@ premailer
 scikit-image
 python-docx 
 BeautifulSoup4
+tools

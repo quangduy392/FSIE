@@ -62,6 +62,7 @@ def init_args():
     # params for text classifier
     parser.add_argument("--use_angle_cls", type=str2bool, default=False)
     parser.add_argument("--cls_model_dir", type=str, default="model/cls")
+    parser.add_argument("--cls_config", type=str, default='utils/inference_text_image_orientation.yaml')
     parser.add_argument("--cls_image_shape", type=str, default="3, 416, 416")
     parser.add_argument("--label_list", type=list, default=['0', '90', '180', '270'])
     parser.add_argument("--cls_batch_num", type=int, default=6)
@@ -87,7 +88,7 @@ def init_args():
     parser.add_argument("--merge_no_span_structure", type=str2bool, default=True)
     parser.add_argument("--table_char_dict_path", type=str,default="utils/dict/table_dict.txt")
     # params for layout
-    parser.add_argument("--arch", type=str, default="PicoDet", help="Choose the arch you want to run, it can be: PPYOLO/PicoDet, PicoDet if you want use PicoDet model (small model)/PPYOLO if you want use PPYOLO model (large model).")
+    parser.add_argument("--arch", type=str, default="PPYOLO", help="Choose the arch you want to run, it can be: PPYOLO/PicoDet, PicoDet if you want use PicoDet model (small model)/PPYOLO if you want use PPYOLO model (large model).")
     parser.add_argument("--layout_picodet_model_dir", type=str, default="model/layout_picodet")
     parser.add_argument("--layout_ppyolo_model_dir", type=str, default="model/layout_ppyolo")
     parser.add_argument("--layout_dict_path",type=str, default="utils/dict/layout_dict/layout_publaynet_dict.txt")

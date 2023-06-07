@@ -1,13 +1,21 @@
+import sys
 import os
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(__dir__)
+sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
+
+os.environ["FLAGS_allocator_strategy"] = 'auto_growth'
 import cv2
 import numpy as np
 import time
-from src.ocr.postprocess import config
-import utility as utility
-from utility import get_image_file_list, check_and_read
-from src.ocr.postprocess.cls_pre_postprocess import *
+from ocr.postprocess import config
+import utils.utility as utility
+from utils.utility import get_image_file_list, check_and_read
+from ocr.postprocess.cls_pre_postprocess import *
+from utils.logging import get_logger
+logger = get_logger()
 
-    
+
 class TextClassifier(object):
     def __init__(self, args):
         configs = config.get_config(args.cls_config, show=True)
@@ -20,12 +28,15 @@ class TextClassifier(object):
         if "PostProcess" in configs:
             self.postprocess = build_postprocess(configs["PostProcess"])
         self.predictor, self.input_tensor, self.output_tensors, _ = \
-            utility.create_predictor(args, 'cls')
+            utility.create_predictor(args, 'cls', logger)
 
     def __call__(self, images):
         img_ori = images[0].copy()
-        input_names = self.predictor.get_inputs()[0].name
-        output_names = self.predictor.get_outputs()[0].name
+        input_names = self.predictor.get_input_names()
+        input_tensor = self.predictor.get_input_handle(input_names[0])
+
+        output_names = self.predictor.get_output_names()
+        output_tensor = self.predictor.get_output_handle(output_names[0])
         elapse = 0
         starttime = time.time()
         if not isinstance(images, (list, )):
@@ -35,9 +46,9 @@ class TextClassifier(object):
                 images[idx] = ops(images[idx])
         image = np.array(images)
 
-        batch_output = self.predictor.run(
-            output_names=[output_names],
-            input_feed={input_names: image})[0]
+        input_tensor.copy_from_cpu(image)
+        self.predictor.run()
+        batch_output = output_tensor.copy_to_cpu()
 
         if self.postprocess is not None:
             batch_output = self.postprocess(batch_output)
