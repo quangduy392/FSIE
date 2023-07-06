@@ -194,7 +194,6 @@ class StructureSystem(object):
                 pre_page['table_index'] = table_index
                 pre_page["index_pre"] = img_idx
 
-
             end = time.time()
             time_dict['all'] = end - start
             return res_list, time_dict, table_index

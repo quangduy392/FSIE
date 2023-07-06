@@ -118,7 +118,6 @@ def main():
     return ("DONE")
     
 
-
 if __name__ == "__main__":
     args = parse_args()
     image_file_list = get_image_file_list(args.image_dir)
