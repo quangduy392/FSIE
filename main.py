@@ -18,6 +18,11 @@ def run(image_dir):
     img_num = len(image_file_list)
 
     for i, image_file in enumerate(image_file_list):
+        table_info= {
+        "pre" : 0,
+        "now" : 0,
+        "pre_name" : ''
+        }
         logger.info("[{}/{}] {}".format(i, img_num, image_file))
         img, flag_gif, flag_pdf = check_and_read(image_file)
         img_name = os.path.basename(image_file).split('.')[0]
@@ -34,14 +39,21 @@ def run(image_dir):
             imgs = img
 
         all_res = []
+        pre_page ={
+            'index_pre' : 10000,
+            'header_pre' : '',
+            'table_index' : 0
+        }
         for index, img in enumerate(imgs):
-            res, time_dict = structure_sys(img, img_idx=index)
+            res, time_dict, table_index_now  = structure_sys(img, pre_page, img_idx=index)
+            table_info['now'] = table_index_now
             img_save_path = os.path.join(save_folder, img_name,
                                          'show_{}.jpg'.format(index))
             os.makedirs(os.path.join(save_folder, img_name), exist_ok=True)
             if structure_sys.mode == 'structure' and res != []:
                 draw_img = draw_structure_result(img, res, vis_font_path)
-                save_structure_res(res, save_folder, img_name, index)
+                save_structure_res(res, save_folder, img_name, table_info, index)
+                table_info['pre'] = table_index_now
             elif structure_sys.mode == 'kie':
                 if structure_sys.kie_predictor.predictor is not None:
                     draw_img = draw_re_results(

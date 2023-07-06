@@ -11,6 +11,7 @@ import json
 import numpy as np
 import time
 import logging
+import pandas as pd
 from copy import deepcopy
 
 from utils.utility import get_image_file_list, check_and_read, parse_args, draw_structure_result, draw_ser_results, draw_re_results
@@ -60,7 +61,7 @@ class StructureSystem(object):
             from structure.kie.predict_kie_token_ser_re import SerRePredictor
             self.kie_predictor = SerRePredictor(args)
 
-    def __call__(self, img, return_ocr_result_in_table=False, img_idx=0):
+    def __call__(self, img, pre_page, return_ocr_result_in_table=False, img_idx=0):
         time_dict = {
             'image_orientation': 0,
             'layout': 0,
@@ -86,8 +87,12 @@ class StructureSystem(object):
                 h, w = ori_im.shape[:2]
                 layout_res = [dict(bbox=None, label='table')]
             res_list = []
+            acc = 0 
+            rec_header_res=''
             for region in layout_res:
                 res = ''
+                if 'text' == region['label']:
+                    have_text = True
                 if region['bbox'] is not None:
                     x1, y1, x2, y2 = region['bbox']
                     x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
@@ -145,9 +150,54 @@ class StructureSystem(object):
                     'res': res,
                     'img_idx': img_idx
                 })
+                if 'header' == region['label']:
+                    have_header = True
+                    rec_header_res= self.text_system.text_recognizer(
+                            [roi_img])
+                    # for tmp in self.header_table_dict:
+                        # print(tmp)
+                    # header = tmp.split('\t')
+                    rec_res_cp=list(rec_header_res[0][0][0].lower().strip())
+                    rec_res_cp.sort()
+
+                    label_compare = list(pre_page['header_pre'].lower().strip())
+                    label_compare.sort()
+                    count = 0
+                    length_cp = (len(rec_res_cp)+len(label_compare))/2
+                    while len(label_compare) > 0 and len(rec_res_cp) > 0:
+                        if rec_res_cp[0] == label_compare[0]:
+                            label_compare.pop(0)
+                            rec_res_cp.pop(0)
+                            count += 1
+                        elif rec_res_cp[0] < label_compare[0]:
+                            rec_res_cp.pop(0)
+                        else: 
+                            label_compare.pop(0)
+                    acc = count/length_cp
+                    # print('acuracy: ',acc)
+
+                    # if acc >= 0.8:
+                    #     # tableextract = True
+                    #     table_index = pre_page["table_index"]
+                    #     pre_page["index_pre"] = img_idx
+                        # pre_page["table_index"] = table_index
+                        # break
+                    # else: 
+                    #     tableextract = False
+                
+            if not have_header and not have_text and acc >= 0.8 and img_idx - pre_page['index_pre'] == 1:
+                # tableextract = True
+                table_index = pre_page['table_index']
+            else: 
+                pre_page["header_pre"] = rec_header_res
+                table_index = pre_page['table_index'] + 1
+                pre_page['table_index'] = table_index
+                pre_page["index_pre"] = img_idx
+
+
             end = time.time()
             time_dict['all'] = end - start
-            return res_list, time_dict
+            return res_list, time_dict, table_index
         if self.mode == 'kie':
             re_res, elapse = self.kie_predictor(img)
             time_dict['kie'] = elapse
@@ -156,10 +206,11 @@ class StructureSystem(object):
         return None, None
 
 
-def save_structure_res(res, save_folder, img_name, img_idx=0):
+def save_structure_res(res, save_folder, img_name, table_info, img_idx=0):
     excel_save_folder = os.path.join(save_folder, img_name)
     os.makedirs(excel_save_folder, exist_ok=True)
     res_cp = deepcopy(res)
+    excl_list = []
     # save res
     with open(
             os.path.join(excel_save_folder, 'res_{}.txt'.format(img_idx)),
@@ -175,6 +226,17 @@ def save_structure_res(res, save_folder, img_name, img_idx=0):
                     excel_save_folder,
                     '{}_{}.xlsx'.format(region['bbox'], img_idx))
                 to_excel(region['res']['html'], excel_path)
+                if table_info['pre'] == table_info['now']:
+                    # concat excel
+                    excl_list.append(pd.read_excel(table_info['pre_name']))
+                    excl_list.append(pd.read_excel(excel_path))
+                    excl_merged = pd.concat(excl_list, ignore_index=True)
+                    excl_merged.to_excel(table_info['pre_name'], index=False)
+                    os.remove(excel_path)
+                    pass
+                else:
+                    table_info['pre_name'] = excel_path
+
             elif region['type'].lower() == 'figure':
                 img_path = os.path.join(
                     excel_save_folder,
