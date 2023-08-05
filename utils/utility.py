@@ -13,6 +13,7 @@ import math
 from paddle import inference
 import random
 import time
+import mammoth
 # import zipfile
     
 
@@ -44,7 +45,7 @@ def init_args():
     # DB parmas
     parser.add_argument("--det_db_thresh", type=float, default=0.3)
     parser.add_argument("--det_db_box_thresh", type=float, default=0.6)
-    parser.add_argument("--det_db_unclip_ratio", type=float, default=1.5)
+    parser.add_argument("--det_db_unclip_ratio", type=float, default=1.8)
     parser.add_argument("--max_batch_size", type=int, default=10)
     parser.add_argument("--use_dilation", type=str2bool, default=False)
     parser.add_argument("--det_db_score_mode", type=str, default="fast")
@@ -92,8 +93,8 @@ def init_args():
     parser.add_argument("--layout_picodet_model_dir", type=str, default="model/layout_picodet")
     parser.add_argument("--layout_ppyolo_model_dir", type=str, default="model/layout_ppyolo")
     parser.add_argument("--layout_dict_path",type=str, default="utils/dict/layout_dict/layout_publaynet_dict.txt")
-    parser.add_argument("--layout_score_threshold", type=float,default=0.5, help="Threshold of score.")
-    parser.add_argument("--layout_nms_threshold", type=float, default=0.5, help="Threshold of nms.")
+    parser.add_argument("--layout_score_threshold", type=float,default=0.4, help="Threshold of score.")
+    parser.add_argument("--layout_nms_threshold", type=float, default=0.4, help="Threshold of nms.")
     # params for kie
     parser.add_argument("--kie_algorithm", type=str, default='LayoutXLM')
     parser.add_argument("--ser_model_dir", type=str, default="model/ser_kie")
@@ -1239,6 +1240,13 @@ def draw_umich_gaussian(heatmap, center, radius, k=1):
         np.maximum(masked_heatmap, masked_gaussian * k, out=masked_heatmap)
     return heatmap
 
+
+def concat_docx2html(input_filename):
+    with open(input_filename, "rb") as docx_file:
+        result = mammoth.extract_raw_text(docx_file)
+        text = result.value # The raw text
+        with open('static/output/html/docx_output.html', 'w') as text_file:
+            text_file.write(text)
 
 
 if __name__ == '__main__':

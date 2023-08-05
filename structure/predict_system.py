@@ -89,6 +89,8 @@ class StructureSystem(object):
             res_list = []
             acc = 0 
             rec_header_res=''
+            have_header = False
+            have_text = False
             for region in layout_res:
                 res = ''
                 if 'text' == region['label']:
@@ -108,7 +110,7 @@ class StructureSystem(object):
                         time_dict['table_match'] += table_time_dict['match']
                         time_dict['det'] += table_time_dict['det']
                         time_dict['rec'] += table_time_dict['rec']
-                else:
+                elif region['label'] == 'text' or region['label'] == 'headerllll':
                     if self.text_system is not None:
                         if self.recovery:
                             wht_im = np.ones(ori_im.shape, dtype=ori_im.dtype)
@@ -159,32 +161,21 @@ class StructureSystem(object):
                     # header = tmp.split('\t')
                     rec_res_cp=list(rec_header_res[0][0][0].lower().strip())
                     rec_res_cp.sort()
-
-                    label_compare = list(pre_page['header_pre'].lower().strip())
-                    label_compare.sort()
-                    count = 0
-                    length_cp = (len(rec_res_cp)+len(label_compare))/2
-                    while len(label_compare) > 0 and len(rec_res_cp) > 0:
-                        if rec_res_cp[0] == label_compare[0]:
-                            label_compare.pop(0)
-                            rec_res_cp.pop(0)
-                            count += 1
-                        elif rec_res_cp[0] < label_compare[0]:
-                            rec_res_cp.pop(0)
-                        else: 
-                            label_compare.pop(0)
-                    acc = count/length_cp
-                    # print('acuracy: ',acc)
-
-                    # if acc >= 0.8:
-                    #     # tableextract = True
-                    #     table_index = pre_page["table_index"]
-                    #     pre_page["index_pre"] = img_idx
-                        # pre_page["table_index"] = table_index
-                        # break
-                    # else: 
-                    #     tableextract = False
-                
+                    if pre_page['header_pre'] != '':
+                        label_compare = list(pre_page['header_pre'][0][0][0].lower().strip())
+                        label_compare.sort()
+                        count = 0
+                        length_cp = (len(rec_res_cp)+len(label_compare))/2
+                        while len(label_compare) > 0 and len(rec_res_cp) > 0:
+                            if rec_res_cp[0] == label_compare[0]:
+                                label_compare.pop(0)
+                                rec_res_cp.pop(0)
+                                count += 1
+                            elif rec_res_cp[0] < label_compare[0]:
+                                rec_res_cp.pop(0)
+                            else: 
+                                label_compare.pop(0)
+                        acc = count/length_cp                
             if not have_header and not have_text and acc >= 0.8 and img_idx - pre_page['index_pre'] == 1:
                 # tableextract = True
                 table_index = pre_page['table_index']

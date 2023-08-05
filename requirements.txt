@@ -1,6 +1,6 @@
 paddlepaddle         #if use CPU
 #paddlepaddle-gpu     #if use GPU
-pillow
+Pillow==9.5.0
 opencv-python
 pandas
 numpy

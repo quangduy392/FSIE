@@ -2,7 +2,7 @@ import cv2
 import os
 import shutil
 from structure.predict_system import StructureSystem, save_structure_res
-from utils.utility import parse_args, get_image_file_list, check_and_read, parse_args, draw_structure_result, draw_ser_results, draw_re_results
+from utils.utility import parse_args, get_image_file_list, check_and_read, parse_args, draw_structure_result, draw_ser_results, draw_re_results, concat_docx2html
 from flask import *  
 from utils.logging import get_logger
 
@@ -85,7 +85,8 @@ def run(image_dir):
 
         if recovery and all_res != []:
             try:
-                convert_info_docx(img, all_res, save_folder, img_name)
+                docx_path = convert_info_docx(img, all_res, save_folder, img_name)
+                # concat_docx2html(docx_path)
             except Exception as ex:
                 logger.error("error in layout recovery image:{}, err msg: {}".
                              format(image_file, ex))
@@ -93,9 +94,16 @@ def run(image_dir):
         logger.info("Predict time : {:.3f}s".format(time_dict['all']))
     return img_name
 
-    
-@app.route('/', methods=['GET', 'POST', 'DELETE', 'PUT'])  
-def main(): 
+@app.route('/')  
+def main():  
+    return render_template("index.html")
+
+@app.route('/download/<path:filename>', methods=['GET', 'POST'])
+def download(filename):
+    return send_file(filename)
+
+@app.route('/success', methods=['POST'])  
+def success(): 
     if request.method == 'POST': 
         for filename in os.listdir(save_folder):
             file_path = os.path.join(save_folder, filename)
@@ -115,7 +123,17 @@ def main():
         #     return send_file(save_folder + '/' + child_save_folder + '.zip')
         # except Exception as e:
         #     return str(e)
-    return ("DONE")
+        for filename in os.listdir(zip_dir):
+            file_path = os.path.join(zip_dir, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+        shutil.copy2(save_folder + '/' + child_save_folder + '.zip', zip_dir)
+    return render_template("output.html", filename= zip_dir + child_save_folder + '.zip')
     
 
 if __name__ == "__main__":
@@ -128,6 +146,10 @@ if __name__ == "__main__":
     structure_sys = StructureSystem(args)
     save_folder = args.output
     os.makedirs(save_folder, exist_ok=True)
+    zip_dir = 'static/output/zip/' 
+    os.makedirs(os.path.join(zip_dir), exist_ok=True)
+    figure_dir = 'static/output/figure/'
+    os.makedirs(os.path.join(figure_dir), exist_ok=True)
     for filename in os.listdir(save_folder):
         file_path = os.path.join(save_folder, filename)
         try:

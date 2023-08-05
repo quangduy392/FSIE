@@ -1,1 +1,0 @@
-{"type": "header", "bbox": [519, 478, 998, 517], "res": [{"text": "C\u00d4NG T\u01afC\u1ed4 PH\u1ea6N \u0110\u01af\u1edeNG KON TUN", "confidence": 0.9473026990890503, "text_region": [[522.0, 483.0], [994.0, 483.0], [994.0, 511.0], [522.0, 511.0]]}], "img_idx": 0}

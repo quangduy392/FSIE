@@ -157,9 +157,10 @@ class PPYoloDetector(object):
         # postprocess
         self.det_times.postprocess_time_s.start()
         result = self.postprocess(inputs, result)
+        print(resultll)
         self.det_times.postprocess_time_s.end()
         self.det_times.img_num += len(image_list)
-        print(result)
+        # print(result)
         elapse = time.time() - starttime
         np_boxes = result['boxes']
         expect_boxes = (np_boxes[:, 1] > 0.5) & (np_boxes[:, 0] > -1)

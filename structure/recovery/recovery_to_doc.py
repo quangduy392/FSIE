@@ -1,6 +1,6 @@
 import os
 from copy import deepcopy
-
+import shutil
 from docx import Document
 from docx import shared
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -15,10 +15,22 @@ logger = get_logger()
 
 
 def convert_info_docx(img, res, save_folder, img_name):
+    figure_dir = 'static/output/figure/'
+    for filename in os.listdir(figure_dir):
+            file_path = os.path.join(figure_dir, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
     doc = Document()
     doc.styles['Normal'].font.name = 'Times New Roman'
     doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
     doc.styles['Normal'].font.size = shared.Pt(6.5)
+    html_file = open('static/output/html/docx_output.html', 'w')
+            # text_file.write(text)
 
     flag = 1
     for i, region in enumerate(res):
@@ -36,6 +48,9 @@ def convert_info_docx(img, res, save_folder, img_name):
             excel_save_folder = os.path.join(save_folder, img_name)
             img_path = os.path.join(excel_save_folder,
                                     '{}_{}.jpg'.format(region['bbox'], img_idx))
+            shutil.copy2(img_path, figure_dir)
+            
+            html_img_path = '../figure/' + img_path.split('/')[-1]
             paragraph_pic = doc.add_paragraph()
             paragraph_pic.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = paragraph_pic.add_run("")
@@ -43,26 +58,48 @@ def convert_info_docx(img, res, save_folder, img_name):
                 run.add_picture(img_path, width=shared.Inches(5))
             elif flag == 2:
                 run.add_picture(img_path, width=shared.Inches(2))
+            html_line = '<img src="{}" >'.format(html_img_path)
+            html_file.write(html_line)
         elif region['type'].lower() == 'title':
             doc.add_heading(region['res'][0]['text'])
+            html_line = '<h2>{}</h2>'.format(region['res'][0]['text'])
+            html_file.write(html_line)
         elif region['type'].lower() == 'table':
             parser = HtmlToDocx()
             parser.table_style = 'TableGrid'
             parser.handle_table(region['res']['html'], doc)
+            html_file.write(region['res']['html'])
         else:
             paragraph = doc.add_paragraph()
             paragraph_format = paragraph.paragraph_format
+            text_line = ''
             for i, line in enumerate(region['res']):
                 if i == 0:
                     paragraph_format.first_line_indent = shared.Inches(0.25)
                 text_run = paragraph.add_run(line['text'] + ' ')
+                text_line = text_line + line['text'] + ' '
                 text_run.font.size = shared.Pt(10)
-
+                if len(line['text']) > 5:
+                    html_line = '<p>{}</p>'.format(text_line)
+                    html_file.write(html_line)
+                    text_line = ''
+    table_style = "<style> \
+                table { \
+                width:100%; \
+                border:1px solid black; \
+                } \
+                th, td { \
+                border:1px solid black; \
+                } \
+                </style>"
+    html_file.write(table_style) 
+    html_file.close()
     # save to docx
     docx_save_path = os.path.join(save_folder, img_name)
     docx_path = os.path.join(docx_save_path, '{}_ocr.docx'.format(img_name))
     doc.save(docx_path)
     logger.info('docx save to {}'.format(docx_path))
+    return docx_path
 
 
 def sorted_layout_boxes(res, w):

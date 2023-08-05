@@ -142,6 +142,7 @@ class PPYoloDetector(object):
         # postprocess
         self.det_times.postprocess_time_s.start()
         result = self.postprocess(inputs, result)
+        
         self.det_times.postprocess_time_s.end()
         self.det_times.img_num += len(image_list)
 
@@ -155,6 +156,7 @@ class PPYoloDetector(object):
             label = self.labels[clsid]
             resultout = {'bbox': bbox, 'label': label}
             resultouts.append(resultout)
+        print(resultouts)
         return resultouts, elapse
 
 def create_inputs(imgs, im_info):

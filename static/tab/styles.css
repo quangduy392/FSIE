@@ -1,0 +1,104 @@
+.tabbedPanels {
+	width: 75%;
+	margin: 10px auto;
+}
+@media only screen and (max-width: 700px) {
+	.tabbedPanels {
+		width: 90%;
+   }
+}
+.tabs {
+	width: auto;
+	margin: 0;
+	padding: 0;
+}
+.tabs li {
+	width: auto; 	
+	list-style-type: none;
+	float: left;
+	text-align: center;
+}
+.inactive {
+	position: relative;
+	top: 0;
+}
+.tabs a {
+	display: block;
+	text-decoration: none;
+	padding: 10px 15px;
+	box-sixing: border-box;
+	width: 8rem;
+	color: black;
+	border-radius: 10px 10px 0 0;
+	font-family: 'Raleway';
+	font-weight: 700;
+	font-size: 1.2rem;
+	color: white;
+	letter-spacing: 2px;
+}
+@media only screen and (max-width: 700px) {
+	.tabs a {
+		width: 8rem;
+		padding: 16px 12px;
+   }
+}
+@media only screen and (max-width: 700px) and (max-width: 500px) {
+	.tabs a {
+		letter-spacing: 0;
+		width: 4rem;
+   }
+}
+.tabs a.active {
+	border-radius: 10px 10px 0 0;
+	position: relative;
+	top: 1px;
+	z-index: 100;
+}
+.tabOne {
+	width: auto;
+	background-color: #4498c6;
+}
+.tabTwo {
+	width: auto;
+	background-color: #296586;
+}
+.tabThree {
+	width: auto;
+	background-color: #1d475f;
+}
+.tabFour {
+	width: auto;
+	background-color: #022431;
+}
+.panel {
+	width: 85%;
+	margin: 1rem auto;
+	background-color: white;
+	border-radius: 20px;
+	padding: 20px;
+}
+.panelContainer {
+	clear: left;
+	padding: 20px;
+	background-color: #4498c6;
+	border-radius: 0 20px 20px 20px;
+}
+.panelContent {
+	line-height: 100%;
+	font-family: Raleway;
+	padding: 0 1rem;
+	font-size: 1.2rem;
+}
+h1.panelContent {
+	font-size: 2.2rem;
+}
+@media only screen and (max-width: 700px) {
+	html {
+		font-size: 14px;
+   }
+}
+@media only screen and (max-width: 700px) and (max-width: 450px) {
+	html {
+		font-size: 12px;
+   }
+}
