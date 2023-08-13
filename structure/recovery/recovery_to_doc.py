@@ -29,7 +29,7 @@ def convert_info_docx(img, res, save_folder, img_name):
     doc.styles['Normal'].font.name = 'Times New Roman'
     doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'宋体')
     doc.styles['Normal'].font.size = shared.Pt(6.5)
-    html_file = open('static/output/html/docx_output.html', 'w')
+    html_file = open('static/output/html/docx_output.html', 'w', encoding='utf8')
             # text_file.write(text)
 
     flag = 1
